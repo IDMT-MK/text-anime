@@ -1,57 +1,41 @@
-var TxtRotate = function(el, toRotate, period) {
-  this.toRotate = toRotate;
-  this.el = el;
-  this.loopNum = 0;
-  this.period = parseInt(period, 10) || 2000;
-  this.txt = '';
-  this.tick();
-  this.isDeleting = false;
-};
+$(".openbtn").click(function () {//ボタンがクリックされたら
+	$(this).toggleClass('active');//ボタン自身に activeクラスを付与し
+    $("#g-nav").toggleClass('panelactive');//ナビゲーションにpanelactiveクラスを付与
+});
 
-TxtRotate.prototype.tick = function() {
-  var i = this.loopNum % this.toRotate.length;
-  var fullTxt = this.toRotate[i];
+$("#g-nav a").click(function () {//ナビゲーションのリンクがクリックされたら
+    $(".openbtn").removeClass('active');//ボタンの activeクラスを除去し
+    $("#g-nav").removeClass('panelactive');//ナビゲーションのpanelactiveクラスも除去
+});
 
-  if (this.isDeleting) {
-    this.txt = fullTxt.substring(0, this.txt.length - 1);
-  } else {
-    this.txt = fullTxt.substring(0, this.txt.length + 1);
+const hour = document.querySelector(".hour.hand");
+const minute = document.querySelector(".minute.hand");
+const second = document.querySelector(".second.hand");
+
+setInterval(() => {
+  const date = new Date();
+  const s = (360 / 60) * date.getSeconds();
+  const m = (360 / 60) * date.getMinutes() + (s / 60);
+  const h = (360 / 24) * date.getHours() + (m / 24);
+  
+  second.style.transform = `rotate(${s}deg)`;
+  minute.style.transform = `rotate(${m}deg)`;
+  hour.style.transform = `rotate(${h}deg)`;
+}, 1000);
+
+const container = document.querySelector('.box-02');
+const slides = document.querySelectorAll('.slide');
+const containerWidth = container.offsetWidth;
+gsap.to( slides, {
+   xPercent: -110 * (slides.length - 1),
+   ease: "none",
+   scrollTrigger: {
+      trigger: container,
+      pin: true,
+      scrub: 1,
+      end: () => "+=" + containerWidth,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      markers:true,
   }
-
-  this.el.innerHTML = '<span class="wrap">'+this.txt+'</span>';
-
-  var that = this;
-  var delta = 300 - Math.random() * 100;
-
-  if (this.isDeleting) { delta /= 2; }
-
-  if (!this.isDeleting && this.txt === fullTxt) {
-    delta = this.period;
-    this.isDeleting = true;
-  } else if (this.isDeleting && this.txt === '') {
-    this.isDeleting = false;
-    this.loopNum++;
-    delta = 500;
-  }
-
-  setTimeout(function() {
-    that.tick();
-  }, delta);
-};
-
-window.onload = function() {
-  var elements = document.getElementsByClassName('txt-rotate');
-  for (var i=0; i<elements.length; i++) {
-    var toRotate = elements[i].getAttribute('data-rotate');
-    var period = elements[i].getAttribute('data-period');
-    if (toRotate) {
-      new TxtRotate(elements[i], JSON.parse(toRotate), period);
-    }
-  }
-  // INJECT CSS
-  var css = document.createElement("style");
-  css.type = "text/css";
-  css.innerHTML = ".txt-rotate > .wrap { border-right: 0.08em solid #666 }";
-  document.body.appendChild(css);
-};
-
+})
